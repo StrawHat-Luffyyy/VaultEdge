@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from './trpc.js';
+import { orgRouter } from './routers/org.js';
 
 /**
  * Root application router.
@@ -14,12 +15,7 @@ export const appRouter = router({
   }),
 
   // ── Organization ────────────────────────────────────────────────────────
-  org: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
-      ctx.logger.info('org.list called');
-      return []; // TODO: M2 implementation
-    }),
-  }),
+  org: orgRouter,
 
   // ── Project ─────────────────────────────────────────────────────────────
   project: router({
