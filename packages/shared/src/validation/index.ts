@@ -109,12 +109,12 @@ export const createPromptVersionSchema = z.object({
 
 export const inviteMemberSchema = z.object({
   email: z.string().email(),
-  role: z.enum(['admin', 'member', 'viewer']),
+  role: z.enum(['admin', 'developer', 'viewer']),
 });
 
 export const updateMemberRoleSchema = z.object({
   memberId: z.string().uuid(),
-  role: z.enum(['admin', 'member', 'viewer']),
+  role: z.enum(['admin', 'developer', 'viewer']),
 });
 
 // ── Alert Schemas ───────────────────────────────────────────────────────────

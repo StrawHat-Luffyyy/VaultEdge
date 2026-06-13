@@ -32,6 +32,7 @@ const envSchema = z.object({
 
   // Encryption
   ENCRYPTION_KEY: z.string().min(1),
+  API_KEY_SECRET: z.string().min(32),
 
   // CORS
   CORS_ORIGINS: z.string().min(1),

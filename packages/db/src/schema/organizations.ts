@@ -13,6 +13,7 @@ export const organizations = pgTable('organizations', {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
 export type Organization = typeof organizations.$inferSelect;

@@ -52,19 +52,19 @@ export async function createContext(
 }
 
 // Type-safe session and user interfaces (matching Better Auth output)
-interface Session {
+export interface Session {
   id: string;
   userId: string;
   token: string;
   expiresAt: Date;
 }
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
   emailVerified: boolean;
-  image: string | null;
+  image?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

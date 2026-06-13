@@ -4,7 +4,7 @@ import { createAuthClient } from 'better-auth/react';
  * Better Auth client for use in the Next.js frontend.
  * Must be initialized with the API URL.
  */
-export function createVaultEdgeAuthClient(apiUrl: string) {
+export function createVaultEdgeAuthClient(apiUrl: string): ReturnType<typeof createAuthClient> {
   return createAuthClient({
     baseURL: apiUrl,
   });

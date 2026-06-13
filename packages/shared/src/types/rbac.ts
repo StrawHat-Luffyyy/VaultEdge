@@ -2,8 +2,15 @@
  * RBAC types — roles, permissions, and membership.
  */
 
-export const ORG_ROLES = ['owner', 'admin', 'member', 'viewer'] as const;
+export const ORG_ROLES = ['owner', 'admin', 'developer', 'viewer'] as const;
 export type OrgRole = (typeof ORG_ROLES)[number];
+
+export const ROLE_HIERARCHY: Record<OrgRole, number> = {
+  owner: 4,
+  admin: 3,
+  developer: 2,
+  viewer: 1,
+};
 
 export const PERMISSIONS = [
   'org.update',
@@ -42,20 +49,20 @@ export const ROLE_PERMISSIONS: Record<Permission, readonly OrgRole[]> = {
   'member.invite': ['owner', 'admin'],
   'member.updateRole': ['owner', 'admin'],
   'member.remove': ['owner', 'admin'],
-  'project.create': ['owner', 'admin', 'member'],
-  'project.update': ['owner', 'admin', 'member'],
+  'project.create': ['owner', 'admin', 'developer'],
+  'project.update': ['owner', 'admin', 'developer'],
   'project.archive': ['owner', 'admin'],
-  'apiKey.create': ['owner', 'admin', 'member'],
-  'apiKey.revoke': ['owner', 'admin', 'member'],
-  'apiKey.list': ['owner', 'admin', 'member', 'viewer'],
+  'apiKey.create': ['owner', 'admin', 'developer'],
+  'apiKey.revoke': ['owner', 'admin', 'developer'],
+  'apiKey.list': ['owner', 'admin', 'developer', 'viewer'],
   'provider.manage': ['owner', 'admin'],
   'budget.manage': ['owner', 'admin'],
-  'usage.view': ['owner', 'admin', 'member', 'viewer'],
+  'usage.view': ['owner', 'admin', 'developer', 'viewer'],
   'audit.view': ['owner', 'admin'],
   'audit.export': ['owner', 'admin'],
-  'prompt.create': ['owner', 'admin', 'member'],
-  'prompt.edit': ['owner', 'admin', 'member'],
-  'prompt.view': ['owner', 'admin', 'member', 'viewer'],
+  'prompt.create': ['owner', 'admin', 'developer'],
+  'prompt.edit': ['owner', 'admin', 'developer'],
+  'prompt.view': ['owner', 'admin', 'developer', 'viewer'],
   'alert.manage': ['owner', 'admin'],
   'settings.manage': ['owner', 'admin'],
 } as const;

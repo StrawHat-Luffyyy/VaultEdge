@@ -15,7 +15,7 @@ export const orgMembers = pgTable(
     userId: uuid('user_id').notNull(),
     // Better Auth manages the users table; we reference user IDs but don't FK
     // to avoid coupling to Better Auth's internal schema.
-    role: varchar('role', { length: 20 }).notNull().default('member'),
+    role: varchar('role', { length: 20 }).notNull().default('developer'),
     invitedBy: uuid('invited_by'),
     joinedAt: timestamp('joined_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
