@@ -1,0 +1,45 @@
+# ── Stage 1: Base ────────────────────────────────────────────────────────────
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+# ── Stage 2: Install dependencies ───────────────────────────────────────────
+FROM base AS deps
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/db/package.json ./packages/db/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/auth/package.json ./packages/auth/
+RUN pnpm install --frozen-lockfile
+
+# ── Stage 3: Build ──────────────────────────────────────────────────────────
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/auth/node_modules ./packages/auth/node_modules
+COPY . .
+RUN pnpm --filter @vaultedge/api build
+
+# ── Stage 4: Production ────────────────────────────────────────────────────
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Non-root user for security
+RUN addgroup --system --gid 1001 vaultedge && \
+    adduser --system --uid 1001 vaultedge
+
+COPY --from=builder --chown=vaultedge:vaultedge /app/apps/api/dist ./dist
+COPY --from=builder --chown=vaultedge:vaultedge /app/node_modules ./node_modules
+COPY --from=builder --chown=vaultedge:vaultedge /app/packages ./packages
+
+USER vaultedge
+
+EXPOSE 4000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
+
+CMD ["node", "dist/server.js"]
