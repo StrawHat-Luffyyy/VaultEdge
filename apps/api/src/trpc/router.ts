@@ -1,6 +1,7 @@
 import { router, publicProcedure, orgProcedure } from './trpc.js';
 import { orgRouter } from './routers/org.js';
 import { projectRouter } from './routers/project.js';
+import { apiKeyRouter } from './routers/api-key.js';
 
 /**
  * Root application router.
@@ -24,13 +25,7 @@ export const appRouter = router({
   project: projectRouter,
 
   // ── API Keys ────────────────────────────────────────────────────────────
-  apiKey: router({
-    list: orgProcedure('apiKey.list')
-      .query(async ({ ctx }) => {
-        ctx.logger.info('apiKey.list called');
-        return []; // TODO: M2 implementation
-      }),
-  }),
+  apiKey: apiKeyRouter,
 
   // ── Usage ───────────────────────────────────────────────────────────────
   usage: router({
