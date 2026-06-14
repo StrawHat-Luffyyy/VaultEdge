@@ -1,5 +1,6 @@
 import { router, publicProcedure, orgProcedure } from './trpc.js';
 import { orgRouter } from './routers/org.js';
+import { projectRouter } from './routers/project.js';
 
 /**
  * Root application router.
@@ -20,13 +21,7 @@ export const appRouter = router({
   org: orgRouter,
 
   // ── Project ─────────────────────────────────────────────────────────────
-  project: router({
-    list: orgProcedure('org.view')
-      .query(async ({ ctx }) => {
-        ctx.logger.info('project.list called');
-        return []; // TODO: M2 implementation
-      }),
-  }),
+  project: projectRouter,
 
   // ── API Keys ────────────────────────────────────────────────────────────
   apiKey: router({
