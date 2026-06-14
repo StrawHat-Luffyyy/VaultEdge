@@ -7,8 +7,8 @@ import {
   boolean,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
-import { projects } from './projects.js';
+import { organizations } from './organizations';
+import { projects } from './projects';
 
 export const budgets = pgTable('budgets', {
   id: uuid('id').primaryKey().defaultRandom(),

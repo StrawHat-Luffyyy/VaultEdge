@@ -1,5 +1,5 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, index } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
+import { pgTable, uuid, varchar, timestamp, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { organizations } from './organizations';
 
 /**
  * Organization members — junction table for user ↔ org membership.
@@ -25,6 +25,7 @@ export const orgMembers = pgTable(
       .$onUpdate(() => new Date()),
   },
   (table) => [
+    uniqueIndex('idx_org_members_org_user').on(table.orgId, table.userId),
     index('idx_org_members_user').on(table.userId),
     index('idx_org_members_org').on(table.orgId),
   ],

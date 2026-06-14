@@ -31,7 +31,7 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
 
   // Encryption
-  ENCRYPTION_KEY: z.string().min(1),
+  ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
   API_KEY_SECRET: z.string().min(32),
 
   // CORS

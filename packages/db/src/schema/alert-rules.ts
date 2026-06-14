@@ -8,7 +8,7 @@ import {
   timestamp,
   jsonb,
 } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
+import { organizations } from './organizations';
 
 export const alertRules = pgTable('alert_rules', {
   id: uuid('id').primaryKey().defaultRandom(),

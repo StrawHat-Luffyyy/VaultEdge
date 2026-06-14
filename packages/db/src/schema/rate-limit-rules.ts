@@ -1,7 +1,7 @@
 import { pgTable, uuid, varchar, integer, boolean, timestamp } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
-import { projects } from './projects.js';
-import { apiKeys } from './api-keys.js';
+import { organizations } from './organizations';
+import { projects } from './projects';
+import { apiKeys } from './api-keys';
 
 export const rateLimitRules = pgTable('rate_limit_rules', {
   id: uuid('id').primaryKey().defaultRandom(),

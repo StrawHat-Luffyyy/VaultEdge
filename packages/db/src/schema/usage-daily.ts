@@ -10,8 +10,8 @@ import {
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
-import { projects } from './projects.js';
+import { organizations } from './organizations';
+import { projects } from './projects';
 
 /**
  * Usage daily — pre-aggregated daily rollups of gateway request data.

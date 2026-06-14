@@ -8,8 +8,8 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
-import { projects } from './projects.js';
+import { organizations } from './organizations';
+import { projects } from './projects';
 
 /**
  * API Keys — used to authenticate gateway requests.

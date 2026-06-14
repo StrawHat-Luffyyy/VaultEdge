@@ -9,7 +9,7 @@ import {
   jsonb,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { organizations } from './organizations.js';
+import { organizations } from './organizations';
 
 /**
  * Provider configurations — stores encrypted LLM provider credentials.

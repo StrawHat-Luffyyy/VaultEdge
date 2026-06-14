@@ -48,7 +48,7 @@ export const orgRouter = router({
         });
 
         // Write audit log
-        await writeAuditLog(tx as any, {
+        await writeAuditLog(tx, {
           orgId: org.id,
           actorId: ctx.user.id,
           actorType: 'user',

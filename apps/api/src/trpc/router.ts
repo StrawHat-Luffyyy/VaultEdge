@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from './trpc.js';
+import { router, publicProcedure, orgProcedure } from './trpc.js';
 import { orgRouter } from './routers/org.js';
 
 /**
@@ -7,6 +6,9 @@ import { orgRouter } from './routers/org.js';
  *
  * In M1, all feature routers are stubbed with placeholder procedures.
  * They will be fully implemented in M2–M5.
+ *
+ * All org-scoped stubs use orgProcedure to enforce tenant isolation
+ * and RBAC even before real implementations are added.
  */
 export const appRouter = router({
   // Health check — public, used by monitoring
@@ -19,8 +21,7 @@ export const appRouter = router({
 
   // ── Project ─────────────────────────────────────────────────────────────
   project: router({
-    list: protectedProcedure
-      .input(z.object({ orgId: z.string().uuid() }))
+    list: orgProcedure('org.view')
       .query(async ({ ctx }) => {
         ctx.logger.info('project.list called');
         return []; // TODO: M2 implementation
@@ -29,8 +30,7 @@ export const appRouter = router({
 
   // ── API Keys ────────────────────────────────────────────────────────────
   apiKey: router({
-    list: protectedProcedure
-      .input(z.object({ orgId: z.string().uuid() }))
+    list: orgProcedure('apiKey.list')
       .query(async ({ ctx }) => {
         ctx.logger.info('apiKey.list called');
         return []; // TODO: M2 implementation
@@ -39,8 +39,7 @@ export const appRouter = router({
 
   // ── Usage ───────────────────────────────────────────────────────────────
   usage: router({
-    summary: protectedProcedure
-      .input(z.object({ orgId: z.string().uuid() }))
+    summary: orgProcedure('usage.view')
       .query(async ({ ctx }) => {
         ctx.logger.info('usage.summary called');
         return { totalRequests: 0, totalTokens: 0, totalCost: 0 }; // TODO: M4
@@ -49,8 +48,7 @@ export const appRouter = router({
 
   // ── Settings ────────────────────────────────────────────────────────────
   settings: router({
-    get: protectedProcedure
-      .input(z.object({ orgId: z.string().uuid() }))
+    get: orgProcedure('org.view')
       .query(async ({ ctx }) => {
         ctx.logger.info('settings.get called');
         return {}; // TODO: M2
