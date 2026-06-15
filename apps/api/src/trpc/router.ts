@@ -2,6 +2,7 @@ import { router, publicProcedure, orgProcedure } from './trpc.js';
 import { orgRouter } from './routers/org.js';
 import { projectRouter } from './routers/project.js';
 import { apiKeyRouter } from './routers/api-key.js';
+import { memberRouter } from './routers/member.js';
 
 /**
  * Root application router.
@@ -26,6 +27,9 @@ export const appRouter = router({
 
   // ── API Keys ────────────────────────────────────────────────────────────
   apiKey: apiKeyRouter,
+
+  // ── Member Management ───────────────────────────────────────────────────
+  member: memberRouter,
 
   // ── Usage ───────────────────────────────────────────────────────────────
   usage: router({
