@@ -25,9 +25,11 @@ if (rawKeys.length === 0) {
 const keyMap = new Map<string, DerivedKey>();
 const derivedKeys: DerivedKey[] = rawKeys.map((rawKey) => {
   const keyBuffer = crypto.createHash('sha256').update(rawKey).digest();
-  const keyId = crypto.createHash('sha256').update(rawKey).digest('hex').slice(0, 8);
+  const keyId = crypto.createHash('sha256').update(rawKey).digest('hex').slice(0, 16);
+  const keyId8 = keyId.slice(0, 8);
   const dk = { keyBuffer, keyId };
   keyMap.set(keyId, dk);
+  keyMap.set(keyId8, dk);
   return dk;
 });
 

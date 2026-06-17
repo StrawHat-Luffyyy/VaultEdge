@@ -57,10 +57,10 @@ export const updateApiKeySchema = z.object({
 export const upsertProviderSchema = z.object({
   provider: z.enum(['openai', 'anthropic', 'gemini', 'mistral']),
   displayName: z.string().max(255).optional(),
-  apiKey: z.string().min(1), // plaintext — will be encrypted before storage
+  apiKey: z.string().min(1).optional(), // plaintext — will be encrypted before storage
   baseUrl: z.string().url().optional(),
-  isEnabled: z.boolean().default(true),
-  priority: z.number().int().min(0).max(100).default(0),
+  isEnabled: z.boolean().optional(),
+  priority: z.number().int().min(0).max(100).optional(),
   modelsAllowed: z.array(z.string()).optional(),
 });
 

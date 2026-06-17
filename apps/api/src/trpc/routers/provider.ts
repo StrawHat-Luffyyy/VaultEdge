@@ -37,25 +37,35 @@ export const providerRouter = router({
         ),
       });
 
-      const maskedKey = maskApiKey(input.apiKey);
-      const { ciphertext, iv } = encryptValue(input.apiKey);
+      let ciphertext: string | undefined;
+      let iv: string | undefined;
+      let maskedKey: string | undefined;
+
+      if (input.apiKey !== undefined) {
+        maskedKey = maskApiKey(input.apiKey);
+        const encrypted = encryptValue(input.apiKey);
+        ciphertext = encrypted.ciphertext;
+        iv = encrypted.iv;
+      }
 
       return await ctx.db.transaction(async (tx) => {
         if (existing) {
+          const updatedSettings = {
+            ...(existing.settings || {}),
+            ...(maskedKey !== undefined ? { maskedKey } : {}),
+          };
+
           const [updated] = await tx
             .update(providerConfigs)
             .set({
-              displayName: input.displayName || existing.displayName || PROVIDER_METADATA[input.provider].name,
-              apiKeyEncrypted: ciphertext,
-              apiKeyIv: iv,
-              baseUrl: input.baseUrl || PROVIDER_METADATA[input.provider].defaultBaseUrl,
-              isEnabled: input.isEnabled,
-              priority: input.priority,
-              modelsAllowed: input.modelsAllowed || PROVIDER_METADATA[input.provider].models,
-              settings: {
-                ...(existing.settings || {}),
-                maskedKey,
-              },
+              displayName: input.displayName !== undefined ? input.displayName : (existing.displayName || PROVIDER_METADATA[input.provider].name),
+              apiKeyEncrypted: ciphertext !== undefined ? ciphertext : existing.apiKeyEncrypted,
+              apiKeyIv: iv !== undefined ? iv : existing.apiKeyIv,
+              baseUrl: input.baseUrl !== undefined ? input.baseUrl : (existing.baseUrl || PROVIDER_METADATA[input.provider].defaultBaseUrl),
+              isEnabled: input.isEnabled !== undefined ? input.isEnabled : existing.isEnabled,
+              priority: input.priority !== undefined ? input.priority : existing.priority,
+              modelsAllowed: input.modelsAllowed !== undefined ? input.modelsAllowed : existing.modelsAllowed,
+              settings: updatedSettings,
               updatedAt: new Date(),
             })
             .where(
@@ -72,6 +82,8 @@ export const providerRouter = router({
               message: 'Failed to update provider configuration',
             });
           }
+
+          const finalMaskedKey = (updated.settings as { maskedKey?: string } | null)?.maskedKey || '••••';
 
           await writeAuditLog(tx, {
             orgId: input.orgId,
@@ -95,7 +107,7 @@ export const providerRouter = router({
                 priority: updated.priority,
                 modelsAllowed: updated.modelsAllowed,
                 baseUrl: updated.baseUrl,
-                maskedKey,
+                maskedKey: finalMaskedKey,
               },
             },
             ipAddress: ctx.ip,
@@ -110,24 +122,32 @@ export const providerRouter = router({
             isEnabled: updated.isEnabled,
             priority: updated.priority,
             modelsAllowed: updated.modelsAllowed,
-            maskedKey,
+            maskedKey: finalMaskedKey,
             createdAt: updated.createdAt,
             updatedAt: updated.updatedAt,
           };
         } else {
+          // Provider creation: apiKey is required
+          if (input.apiKey === undefined) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'apiKey is required when creating a new provider configuration',
+            });
+          }
+
           const [created] = await tx
             .insert(providerConfigs)
             .values({
               orgId: input.orgId,
               provider: input.provider,
-              displayName: input.displayName || PROVIDER_METADATA[input.provider].name,
-              apiKeyEncrypted: ciphertext,
-              apiKeyIv: iv,
-              baseUrl: input.baseUrl || PROVIDER_METADATA[input.provider].defaultBaseUrl,
-              isEnabled: input.isEnabled,
-              priority: input.priority,
-              modelsAllowed: input.modelsAllowed || PROVIDER_METADATA[input.provider].models,
-              settings: { maskedKey },
+              displayName: input.displayName !== undefined ? input.displayName : PROVIDER_METADATA[input.provider].name,
+              apiKeyEncrypted: ciphertext!,
+              apiKeyIv: iv!,
+              baseUrl: input.baseUrl !== undefined ? input.baseUrl : PROVIDER_METADATA[input.provider].defaultBaseUrl,
+              isEnabled: input.isEnabled !== undefined ? input.isEnabled : true,
+              priority: input.priority !== undefined ? input.priority : 0,
+              modelsAllowed: input.modelsAllowed !== undefined ? input.modelsAllowed : PROVIDER_METADATA[input.provider].models,
+              settings: { maskedKey: maskedKey! },
             })
             .returning();
 
@@ -137,6 +157,8 @@ export const providerRouter = router({
               message: 'Failed to create provider configuration',
             });
           }
+
+          const finalMaskedKey = (created.settings as { maskedKey?: string } | null)?.maskedKey || '••••';
 
           await writeAuditLog(tx, {
             orgId: input.orgId,
@@ -152,7 +174,7 @@ export const providerRouter = router({
                 priority: created.priority,
                 modelsAllowed: created.modelsAllowed,
                 baseUrl: created.baseUrl,
-                maskedKey,
+                maskedKey: finalMaskedKey,
               },
             },
             ipAddress: ctx.ip,
@@ -167,7 +189,7 @@ export const providerRouter = router({
             isEnabled: created.isEnabled,
             priority: created.priority,
             modelsAllowed: created.modelsAllowed,
-            maskedKey,
+            maskedKey: finalMaskedKey,
             createdAt: created.createdAt,
             updatedAt: created.updatedAt,
           };
