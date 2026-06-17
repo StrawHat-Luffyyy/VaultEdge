@@ -13,6 +13,7 @@ import { appRouter } from './trpc/router.js';
 import { createContext } from './trpc/context.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { requestId } from './middleware/request-id.js';
+import { gatewayAuth } from './middleware/gateway-auth.js';
 
 async function main() {
   // ── Initialize Dependencies ───────────────────────────────────────────
@@ -88,14 +89,11 @@ async function main() {
     }),
   );
 
-  // ── Gateway Routes (M3 — stub for now) ────────────────────────────────
-  app.post('/v1/*', (_req, res) => {
-    res.status(501).json({
-      error: {
-        message: 'Gateway not implemented yet. Coming in Milestone 3.',
-        type: 'not_implemented',
-        code: 'not_implemented',
-      },
+  // ── Gateway Routes ────────────────────────────────────────────────────
+  app.post('/v1/*', gatewayAuth(db), (req, res) => {
+    res.json({
+      status: 'authenticated',
+      context: req.gatewayContext,
     });
   });
 
