@@ -32,6 +32,7 @@ const envSchema = z.object({
 
   // Encryption
   ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY must be at least 32 characters'),
+  ENCRYPTION_KEYS: z.string().optional(),
   API_KEY_SECRET: z.string().min(32),
 
   // CORS

@@ -3,6 +3,7 @@ import { orgRouter } from './routers/org.js';
 import { projectRouter } from './routers/project.js';
 import { apiKeyRouter } from './routers/api-key.js';
 import { memberRouter } from './routers/member.js';
+import { providerRouter } from './routers/provider.js';
 
 /**
  * Root application router.
@@ -30,6 +31,9 @@ export const appRouter = router({
 
   // ── Member Management ───────────────────────────────────────────────────
   member: memberRouter,
+
+  // ── Provider Credentials ────────────────────────────────────────────────
+  provider: providerRouter,
 
   // ── Usage ───────────────────────────────────────────────────────────────
   usage: router({
