@@ -349,3 +349,6 @@ test().catch((err) => {
   console.error('❌ Verification script encountered error:', err);
   process.exit(1);
 });
+
+export {};
+

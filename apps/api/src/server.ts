@@ -15,12 +15,26 @@ import { errorHandler } from './middleware/error-handler.js';
 import { requestId } from './middleware/request-id.js';
 import { gatewayAuth } from './middleware/gateway-auth.js';
 import { AppError, ERROR_CODES } from '@vaultedge/shared';
-import { resolveProvider } from './lib/provider-resolver.js';
+import { ProviderFactory, MockOpenAIAdapter, MockAnthropicAdapter, MockGeminiAdapter, MockMistralAdapter } from './lib/provider-adapter.js';
+import { CredentialService } from './lib/credential-service.js';
+import { ProviderExecutor } from './lib/provider-executor.js';
+import { ExecutionService } from './lib/execution-service.js';
 
 
 async function main() {
   // ── Initialize Dependencies ───────────────────────────────────────────
   const { db, pool } = createDbClient(env.DATABASE_URL);
+
+  // ── Initialize Provider execution services ────────────────────────────
+  const providerFactory = new ProviderFactory();
+  providerFactory.register('openai', MockOpenAIAdapter);
+  providerFactory.register('anthropic', MockAnthropicAdapter);
+  providerFactory.register('gemini', MockGeminiAdapter);
+  providerFactory.register('mistral', MockMistralAdapter);
+
+  const credentialService = new CredentialService();
+  const providerExecutor = new ProviderExecutor(providerFactory);
+  const executionService = new ExecutionService(db, credentialService, providerExecutor);
 
   const auth = createAuth(db, {
     secret: env.BETTER_AUTH_SECRET,
@@ -95,7 +109,7 @@ async function main() {
   // ── Gateway Routes ────────────────────────────────────────────────────
   app.post('/v1/*', gatewayAuth(db), async (req, res, next) => {
     try {
-      const { model, provider } = req.body || {};
+      const { model, provider, messages, temperature, maxTokens, topP, frequencyPenalty, presencePenalty, stop } = req.body || {};
       const headerProvider = req.headers['x-provider'] || req.headers['x-vaultedge-provider'];
       const preferredProvider = typeof provider === 'string' ? provider : (typeof headerProvider === 'string' ? headerProvider : undefined);
 
@@ -107,17 +121,25 @@ async function main() {
         });
       }
 
-      const resolvedProviders = await resolveProvider({
-        db,
+      // Default message structure to satisfy GatewayChatRequest if not provided
+      const requestMessages = Array.isArray(messages) ? messages : [{ role: 'user', content: 'Hello' }];
+
+      const response = await executionService.executeChat({
         gatewayContext: req.gatewayContext!,
-        model,
+        request: {
+          model,
+          messages: requestMessages,
+          temperature,
+          maxTokens,
+          topP,
+          frequencyPenalty,
+          presencePenalty,
+          stop,
+        },
         preferredProvider,
       });
 
-      res.json({
-        status: 'success',
-        resolvedProviders,
-      });
+      res.json(response);
     } catch (err) {
       next(err);
     }

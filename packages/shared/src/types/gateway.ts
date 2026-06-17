@@ -90,3 +90,8 @@ export interface GatewayRequestLog {
   metadata: Record<string, unknown>;
   timestamp: string;
 }
+
+export type GatewayChatMessage = UnifiedChatMessage;
+export type GatewayChatRequest = UnifiedChatRequest;
+export type GatewayChatResponse = UnifiedChatResponse;
+
