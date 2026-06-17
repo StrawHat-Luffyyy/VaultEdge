@@ -14,6 +14,9 @@ import { createContext } from './trpc/context.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { requestId } from './middleware/request-id.js';
 import { gatewayAuth } from './middleware/gateway-auth.js';
+import { AppError, ERROR_CODES } from '@vaultedge/shared';
+import { resolveProvider } from './lib/provider-resolver.js';
+
 
 async function main() {
   // ── Initialize Dependencies ───────────────────────────────────────────
@@ -90,11 +93,34 @@ async function main() {
   );
 
   // ── Gateway Routes ────────────────────────────────────────────────────
-  app.post('/v1/*', gatewayAuth(db), (req, res) => {
-    res.json({
-      status: 'authenticated',
-      context: req.gatewayContext,
-    });
+  app.post('/v1/*', gatewayAuth(db), async (req, res, next) => {
+    try {
+      const { model, provider } = req.body || {};
+      const headerProvider = req.headers['x-provider'] || req.headers['x-vaultedge-provider'];
+      const preferredProvider = typeof provider === 'string' ? provider : (typeof headerProvider === 'string' ? headerProvider : undefined);
+
+      if (!model || typeof model !== 'string') {
+        throw new AppError({
+          code: ERROR_CODES.VALIDATION_ERROR,
+          message: 'model is required and must be a string in the request body',
+          statusCode: 400,
+        });
+      }
+
+      const resolvedProviders = await resolveProvider({
+        db,
+        gatewayContext: req.gatewayContext!,
+        model,
+        preferredProvider,
+      });
+
+      res.json({
+        status: 'success',
+        resolvedProviders,
+      });
+    } catch (err) {
+      next(err);
+    }
   });
 
   // ── Error Handler (must be last) ──────────────────────────────────────

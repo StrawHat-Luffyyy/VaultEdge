@@ -60,3 +60,15 @@ export const MODEL_PRICING: ModelPricing[] = [
   { provider: 'mistral', model: 'mistral-small-latest', inputPricePerMillion: 0.2, outputPricePerMillion: 0.6 },
   { provider: 'mistral', model: 'open-mistral-nemo', inputPricePerMillion: 0.15, outputPricePerMillion: 0.15 },
 ];
+
+/**
+ * Helper to check if a model is supported by a provider.
+ */
+export function isSupportedModel(provider: string, model: string): boolean {
+  if (!Object.prototype.hasOwnProperty.call(PROVIDER_METADATA, provider)) {
+    return false;
+  }
+  const metadata = PROVIDER_METADATA[provider as LLMProvider];
+  return metadata.models.includes(model);
+}
+
